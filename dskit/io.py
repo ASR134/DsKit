@@ -27,26 +27,34 @@ def load(filepath):
         print(f"Error loading file: {e}")
         return None
 
-def read_folder(folder_path, file_type='csv'):
+def read_folder(folder_path:str, file_type:str='csv',dynamic:bool=False,display_ignored:bool=False):
     """
     Load multiple files from a folder and return 
     a list of pandas DataFrames.
     """
     if not os.path.exists(folder_path):
         raise FileNotFoundError(f"The folder '{folder_path}' was not found.")
-
-    all_files = glob.glob(os.path.join(folder_path, f"*.{file_type}"))
-    
-    if not all_files:
-        print(f"No files found with extension .{file_type} in {folder_path}")
-        return None
+    if dynamic:
+        all_files = glob.glob(os.path.join(folder_path, "*.*"))
+        if not all_files:
+            print(f"No files found!")
+            return None
+    else:
+        all_files = glob.glob(os.path.join(folder_path, f"*.{file_type}"))
+        if not all_files:
+            print(f"No files found with extension .{file_type} in {folder_path}")
+            return None
 
     df_list = []
+    ignored=[]
     for filename in all_files:
         df = load(filename)
         if df is not None:
             df_list.append(df)
-
+        else:
+            ignored.append(filename)
+    if display_ignored:
+        print("Ignored Files : ","\n".join(ignored))
     if df_list:
         return df_list
     else:
